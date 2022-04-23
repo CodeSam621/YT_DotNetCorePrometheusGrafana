@@ -1,0 +1,29 @@
+version: '3.1'
+
+services:
+  web:
+    build: .
+    ports:
+        - "8000:80"
+        - "44348:443"
+    volumes:
+        - ${HOME}/.microsoft/usersecrets/:/root/.microsoft/usersecrets
+        - ${HOME}/.aspnet/https:/root/.aspnet/https/
+
+  prometheus:
+    build: 
+      context: .
+      dockerfile: dockerfile-prometheus.yml
+    ports:
+      - "9090:9090"
+    configs:
+      - source: prometheus_config
+        target: /etc/prometheus/prometheus.yml
+    depends_on:
+      - web
+  grafana:
+    image: grafana/grafana-enterprise
+    ports:
+      - "3001:3000"   
+    depends_on:
+      - prometheus
